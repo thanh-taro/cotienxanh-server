@@ -21,14 +21,28 @@ class User {
 
     public function createUser($attributes = [])
     {
+        $attributes['age'] = (int) $attributes['age'];
+
+        $stmt = $this->db->prepare('SELECT `id`, `name`, `age`, `gender`, `coin`, `diamond`, `created_at`, `updated_at` FROM `users` WHERE `name` = :name AND `age` = :age AND `gender` = :gender LIMIT 1');
+        $stmt->bindParam(':name', $attributes['name']);
+        $stmt->bindParam(':age', $attributes['age']);
+        $stmt->bindParam(':gender', $attributes['gender']);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($result)) {
+            return $result[0];
+        }
+
         $attributes['created_at'] = $attributes['updated_at'] = date('Y-m-d H:i:s');
         $attributes['coin'] = 200;
+        $attributes['diamond'] = 0;
 
-        $stmt = $this->db->prepare('INSERT INTO `users` (`name`, `age`, `gender`, `coin`,`created_at`, `updated_at`) VALUES (:name, :age, :gender, :coin, :created_at, :updated_at)');
+        $stmt = $this->db->prepare('INSERT INTO `users` (`name`, `age`, `gender`, `coin`, `diamond`, `created_at`, `updated_at`) VALUES (:name, :age, :gender, :coin, :diamond, :created_at, :updated_at)');
         $stmt->bindParam(':name', $attributes['name']);
         $stmt->bindParam(':age', $attributes['age']);
         $stmt->bindParam(':gender', $attributes['gender']);
         $stmt->bindParam(':coin', $attributes['coin']);
+        $stmt->bindParam(':diamond', $attributes['diamond']);
         $stmt->bindParam(':created_at', $attributes['created_at']);
         $stmt->bindParam(':updated_at', $attributes['updated_at']);
         $stmt->execute();
