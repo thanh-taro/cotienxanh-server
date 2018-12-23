@@ -50,6 +50,19 @@ class User {
 
         return true;
     }
+
+    public function setDiamond($userId, $diamond)
+    {
+        $updatedAt = date('Y-m-d H:i:s');
+
+        $stmt = $this->db->prepare('UPDATE `users` SET `diamond` = :diamond, `updated_at` = :updated_at WHERE `id` = :id');
+        $stmt->bindParam(':id', $userId);
+        $stmt->bindParam(':diamond', $diamond);
+        $stmt->bindParam(':updated_at', $updatedAt);
+        $stmt->execute();
+
+        return true;
+    }
 }
 
 $config = require __DIR__ . '/config.php';
@@ -84,6 +97,19 @@ $app->post('/set-coin', function (Request $request, Response $response, array $a
     $coin = $attributes['coin'];
 
     $user = (new User($this->db))->setCoin($userId, $coin);
+
+    $response = $response
+        ->withStatus(206);
+
+    return $response;
+});
+
+$app->post('/set-diamond', function (Request $request, Response $response, array $args) {
+    $attributes = $request->getParsedBody();
+    $userId = $attributes['id'];
+    $diamond = $attributes['diamond'];
+
+    $user = (new User($this->db))->setDiamond($userId, $diamond);
 
     $response = $response
         ->withStatus(206);
